@@ -4,6 +4,7 @@ EMPTY = 1
 RESIDENTIAL = 2
 COMMERCIAL = 3
 INDUSTRIAL = 4
+ROAD = 5
 
 
 class City:
@@ -26,11 +27,20 @@ class City:
         for x in range(0, self.width):
             for y in range(0, self.height):
                 self.evaluate_happiness(x, y)
+                self.blocks[x][y].tick()
         self.cash += self.calculate_cashflow()
         self.days_age += 1
         self.print_status()
 
     def evaluate_happiness(self, x, y):
+        tgt_block = self.blocks[x][y]
+
+        if tgt_block.block_type in [EMPTY, INDUSTRIAL, COMMERCIAL]:
+            return 100
+        if tgt_block.block_type == RESIDENTIAL:
+            # First happiness is getting to and from work
+            # begin a series of evaluations
+            return 100
         return 100
 
     def calculate_cashflow(self):
@@ -44,9 +54,15 @@ class CityBlock:
 
     def __init__(self, block_type):
         self.block_type = block_type
+        self.level = 1
+        self.simple_happiness = 100
         self.health = 100
         self.happiness = 0
         self.days_age = 0
+        self.users = 0
+
+    def tick(self):
+        self.days_age += 1
 
 
 def main():
