@@ -20,9 +20,11 @@ class City:
         self.width = width
         self.days_age = 0
         self.blocks = []
-        self.horz_links = [[defaults['link_weight']] * (width - 1)] * (height) 
-        # FUCKED UP
-        self.vert_links = [[defaults['link_weight']] * width] * (height - 1)
+        self.horz_links = [[defaults['link_weight']] * height] * (width - 1)
+        self.vert_links = [[defaults['link_weight']] * (height - 1)] * width
+        print('creating a city {} wide by {} high'.format(width, height))
+        print('creating horiz links with {} width and {} height'.format(len(self.horz_links[0]), len(self.horz_links)))
+        print('creating vertical links with {} width and {} height'.format(len(self.vert_links[0]), len(self.vert_links)))
         for x in range(0, width):
             self.blocks.append([])
             for y in range(0, height):
@@ -73,11 +75,19 @@ class City:
         print('Current Cash: ${}'.format(self.cash))
 
     def print_city(self):
-        for x in range(0, self.width):
-            for y in range(0, self.height):
-                print('{}-'.format(self.blocks[x][y].symbol()), end='')
+        for y in range(0, self.height):
+            for x in range(0, self.width):
                 if x < self.width - 1:
-                    print('{}-'.format(self.horz_links[x][y]), end='')
+                    print('{}--{}--'.format(self.blocks[x][y].symbol(), self.horz_links[x][y]), end='')
+                if x == self.width - 1:
+                    print('{}'.format(self.blocks[x][y].symbol()), end='')
+            print('')
+            for vl in range(0, self.width):
+                if vl == 0:
+                    print('  ', end='')
+                if y == self.height - 1:
+                    continue
+                print('-{}-'.format(self.vert_links[vl][y]), end='')
             print('')
 
 
@@ -113,7 +123,7 @@ class Road(CityBlock):
 
 
 def main():
-    city = City(3, 3)
+    city = City(3, 4)
     city.tick()
     city.tick()
     city.build_road(1, 1, {'north': True, 'West': True})
