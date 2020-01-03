@@ -7,6 +7,11 @@ INDUSTRIAL = 4
 ROAD = 5
 
 
+defaults = {
+    'link_weight': 200
+}
+
+
 class City:
 
     def __init__(self, height, width):
@@ -15,8 +20,9 @@ class City:
         self.width = width
         self.days_age = 0
         self.blocks = []
-        self.horz_links = [[200] * height] * (width - 1)
-        self.vert_links = [[200] * width] * (height - 1)
+        self.horz_links = [[defaults['link_weight']] * (width - 1)] * (height) 
+        # FUCKED UP
+        self.vert_links = [[defaults['link_weight']] * width] * (height - 1)
         for x in range(0, width):
             self.blocks.append([])
             for y in range(0, height):
@@ -46,8 +52,33 @@ class City:
     def calculate_cashflow(self):
         return 100
 
+    def build_road(self, x, y, links):
+        assert self.blocks[x][y].block_type == EMPTY
+        self.blocks[x][y] = Road(links)
+        # we should refactor this out eventually
+        if links.get('north', False):
+            self.vert_links[x][y - 1] = self.blocks[x][y].throughput
+        if links.get('south', False):
+            self.vert_links[x][y] = self.blocks[x][y].throughput
+        if links.get('east', False):
+            self.horz_links[x - 1][y] = self.blocks[x][y].throughput
+        if links.get('west', False):
+            self.horz_links[x][y] = self.blocks[x][y].throughput
+
+    def build_res(self, x, y):
+        assert self.blocks[x][y].block_type == EMPTY
+        self.blocks[x, y] = CityBlock(RESIDENTIAL)
+
     def print_status(self):
         print('Current Cash: ${}'.format(self.cash))
+
+    def print_city(self):
+        for x in range(0, self.width):
+            for y in range(0, self.height):
+                print('{}-'.format(self.blocks[x][y].symbol()), end='')
+                if x < self.width - 1:
+                    print('{}-'.format(self.horz_links[x][y]), end='')
+            print('')
 
 
 class CityBlock:
@@ -61,17 +92,35 @@ class CityBlock:
         self.days_age = 0
         self.users = 0
 
+    def symbol(self):
+        typeD = {
+            ROAD: 'R',
+            RESIDENTIAL: 'H',
+            EMPTY: '.'
+        }
+        return typeD.get(self.block_type, '-')
+
     def tick(self):
         self.days_age += 1
+
+
+class Road(CityBlock):
+
+    def __init__(self, links):
+        self.links = links
+        self.throughput = 100
+        super().__init__(ROAD)
 
 
 def main():
     city = City(3, 3)
     city.tick()
     city.tick()
+    city.build_road(1, 1, {'north': True, 'West': True})
     city.tick()
 
     city.print_status()
+    city.print_city()
 
 
 if __name__ == '__main__':
