@@ -1,11 +1,6 @@
 # -*- coding: utf-8 -*-
 
-EMPTY = 1
-RESIDENTIAL = 2
-COMMERCIAL = 3
-INDUSTRIAL = 4
-ROAD = 5
-
+from blocktypes import b
 
 defaults = {
     'link_weight': 200
@@ -28,7 +23,7 @@ class City:
         for x in range(0, width):
             self.blocks.append([])
             for y in range(0, height):
-                self.blocks[x].append(CityBlock(EMPTY))
+                self.blocks[x].append(CityBlock(b['empty']))
 
     def tick(self):
         print('Tick: {}'.format(self.days_age))
@@ -43,9 +38,9 @@ class City:
     def evaluate_happiness(self, x, y):
         tgt_block = self.blocks[x][y]
 
-        if tgt_block.block_type in [EMPTY, INDUSTRIAL, COMMERCIAL]:
+        if tgt_block.block_type in [b['empty'], b['industrial'], b['commercial']]:
             return 100
-        if tgt_block.block_type == RESIDENTIAL:
+        if tgt_block.block_type == b['residential']:
             # First happiness is getting to and from work
             # begin a series of evaluations
             return 100
@@ -55,7 +50,7 @@ class City:
         return 100
 
     def build_road(self, x, y, links):
-        assert self.blocks[x][y].block_type == EMPTY
+        assert self.blocks[x][y].block_type == b['empty']
         self.blocks[x][y] = Road(links)
         # we should refactor this out eventually
         if links.get('north', False):
@@ -68,8 +63,8 @@ class City:
             self.horz_links[x][y] = self.blocks[x][y].throughput
 
     def build_res(self, x, y):
-        assert self.blocks[x][y].block_type == EMPTY
-        self.blocks[x, y] = CityBlock(RESIDENTIAL)
+        assert self.blocks[x][y].block_type == b['empty']
+        self.blocks[x, y] = CityBlock(b['residential'])
 
     def print_status(self):
         print('Current Cash: ${}'.format(self.cash))
@@ -104,9 +99,9 @@ class CityBlock:
 
     def symbol(self):
         typeD = {
-            ROAD: 'R',
-            RESIDENTIAL: 'H',
-            EMPTY: '.'
+            b['road']: 'R',
+            b['residential']: 'H',
+            b['empty']: '.'
         }
         return typeD.get(self.block_type, '-')
 
@@ -119,7 +114,7 @@ class Road(CityBlock):
     def __init__(self, links):
         self.links = links
         self.throughput = 100
-        super().__init__(ROAD)
+        super().__init__(b['road'])
 
 
 def main():
